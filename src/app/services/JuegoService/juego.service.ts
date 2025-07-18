@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 export interface ResultadoJuego {
   jugador: string;
   cpu: string;
@@ -43,13 +44,58 @@ export interface EstadisticasGenerales {
   providedIn: 'root'
 })
 export class JuegoService {
-  
+
+  private apiUrl = 'http://localhost:3000/api'; // Cambia esta URL si usas otro host/puerto
+
+  // Inyectar HttpClient para hacer peticiones HTTP
+
+  /*** Endpoints backend ***/
+
+  obtenerOpciones(): Observable<{ id: number; nombre: string }[]> {
+    return this.http.get<{ id: number; nombre: string }[]>(`${this.apiUrl}/opciones/all`);
+  }
+
+  // Resultados
+  obtenerResultados(): Observable<{ id: number; nombre: string }[]> {
+    return this.http.get<{ id: number; nombre: string }[]>(`${this.apiUrl}/resultados/all`);
+  }
+
+  crearResultado(nombre: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/resultados/`, { nombre });
+  }
+
+  // Partidas
+  obtenerPartidas(): Observable<DetallePartida[]> {
+    return this.http.get<DetallePartida[]>(`${this.apiUrl}/partidas/all`);
+  }
+
+  obtenerPartidaPorId(id: string): Observable<DetallePartida> {
+    return this.http.get<DetallePartida>(`${this.apiUrl}/partidas/part/${id}`);
+  }
+
+  crearPartida(data: { id_opcion_usuario: number; id_opcion_cpu: number, id_resultado: number; }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/partidas/`, data);
+  }
+
+  actualizarPartida(id: string, data: { id_opcion_usuario: number; id_opcion_cpu: number; id_resultado: number }): Observable<any> {
+    return this.http.put(`${this.apiUrl}/partidas/up/${id}`, data);
+  }
+
+  eliminarPartida(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/partidas/del/${id}`);
+  }
+
+  calcularResultado(idUsuario: number, idCpu: number): Observable<{ id: number }> {
+    const body = { idUsuario, idCpu };
+    return this.http.post<{ id: number }>(`${this.apiUrl}/partidas/calcular`, body);
+  }
+
   // Opciones disponibles del juego (con tipado fuerte)
   private readonly opciones: OpcionJuego[] = ['piedra', 'papel', 'tijera'];
 
   // Historial de partidas
   private readonly historialPartidas: DetallePartida[] = [];
-  
+
   // Tiempo de inicio de la partida actual
   private tiempoInicioPartida: number | null = null;
 
@@ -106,7 +152,7 @@ export class JuegoService {
     if (this.tiempoInicioPartida === null) {
       this.iniciarPartida();
     }
-    
+
     const eleccionCPU = this.generarEleccionCPU();
     const ganador = this.determinarGanador(eleccionJugador, eleccionCPU);
 
@@ -130,9 +176,6 @@ export class JuegoService {
    * Obtiene las opciones disponibles del juego
    * @returns OpcionJuego[] - Array con las opciones (piedra, papel, tijera)
    */
-  obtenerOpciones(): OpcionJuego[] {
-    return [...this.opciones];
-  }
 
   /**
    * Registra el resultado de una partida completa en el historial
@@ -143,10 +186,10 @@ export class JuegoService {
    */
   registrarResultadoPartida(modalidad: string, ganador: 'jugador' | 'cpu', puntuacionFinal: string, rondasJugadas: number): void {
     // Calcular la duración de la partida
-    const duracion = this.tiempoInicioPartida 
-      ? Math.floor((Date.now() - this.tiempoInicioPartida) / 1000) 
+    const duracion = this.tiempoInicioPartida
+      ? Math.floor((Date.now() - this.tiempoInicioPartida) / 1000)
       : 0;
-    
+
     // Crear un identificador único para la partida
     const id = `partida_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
 
@@ -163,18 +206,18 @@ export class JuegoService {
 
     // Guardar en el historial
     this.historialPartidas.push(detallePartida);
-    
+
     // Guardar en localStorage (persistencia)
     this.guardarHistorialEnLocalStorage();
-    
+
     // Reiniciar el temporizador
     this.tiempoInicioPartida = null;
-    
+
     // Para simplificar, solo guardamos las últimas 20 partidas
     if (this.historialPartidas.length > 20) {
       this.historialPartidas.shift();
     }
-    
+
     console.log(`Partida registrada: ${ganador} ganó en modalidad ${modalidad} con resultado ${puntuacionFinal}`);
   }
 
@@ -215,7 +258,7 @@ export class JuegoService {
   obtenerHistorialPartidas(): DetallePartida[] {
     return [...this.historialPartidas];
   }
-  
+
   /**
    * Obtiene las últimas partidas jugadas
    * @param cantidad - Cantidad de partidas a obtener
@@ -245,11 +288,11 @@ export class JuegoService {
       } else {
         victoriasCPU++;
       }
-      
+
       // Contar modalidades
       contadorModalidades[partida.modalidad] = (contadorModalidades[partida.modalidad] || 0) + 1;
     });
-    
+
     // Encontrar modalidad más jugada
     let modalidadFavorita = '';
     let maxPartidas = 0;
@@ -259,11 +302,11 @@ export class JuegoService {
         modalidadFavorita = modalidad;
       }
     });
-    
+
     // Calcular porcentaje de éxito
     const totalPartidas = this.historialPartidas.length;
-    const porcentajeExito = totalPartidas > 0 
-      ? (victoriasJugador / totalPartidas) * 100 
+    const porcentajeExito = totalPartidas > 0
+      ? (victoriasJugador / totalPartidas) * 100
       : 0;
 
     // Devolver estadísticas
@@ -276,11 +319,11 @@ export class JuegoService {
       ultimasPartidas: this.obtenerUltimasPartidas()
     };
   }
-  
+
   /**
    * Constructor del servicio - cargar datos guardados al iniciar
    */
-  constructor() {
+  constructor(private http: HttpClient) {
     this.cargarHistorialDesdeLocalStorage();
   }
 }
