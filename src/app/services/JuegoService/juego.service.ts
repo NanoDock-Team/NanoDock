@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 export interface ResultadoJuego {
   jugador: string;
   cpu: string;
@@ -41,23 +42,26 @@ export interface EstadisticasGenerales {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class JuegoService {
-
-  private apiUrl = 'http://localhost:3000/api'; // Cambia esta URL si usas otro host/puerto
+  private readonly apiUrl = environment.apiUrl;
 
   // Inyectar HttpClient para hacer peticiones HTTP
 
   /*** Endpoints backend ***/
 
   obtenerOpciones(): Observable<{ id: number; nombre: string }[]> {
-    return this.http.get<{ id: number; nombre: string }[]>(`${this.apiUrl}/opciones/all`);
+    return this.http.get<{ id: number; nombre: string }[]>(
+      `${this.apiUrl}/opciones/all`
+    );
   }
 
   // Resultados
   obtenerResultados(): Observable<{ id: number; nombre: string }[]> {
-    return this.http.get<{ id: number; nombre: string }[]>(`${this.apiUrl}/resultados/all`);
+    return this.http.get<{ id: number; nombre: string }[]>(
+      `${this.apiUrl}/resultados/all`
+    );
   }
 
   crearResultado(nombre: string): Observable<any> {
@@ -73,11 +77,22 @@ export class JuegoService {
     return this.http.get<DetallePartida>(`${this.apiUrl}/partidas/part/${id}`);
   }
 
-  crearPartida(data: { id_opcion_usuario: number; id_opcion_cpu: number, id_resultado: number; }): Observable<any> {
+  crearPartida(data: {
+    id_opcion_usuario: number;
+    id_opcion_cpu: number;
+    id_resultado: number;
+  }): Observable<any> {
     return this.http.post(`${this.apiUrl}/partidas/`, data);
   }
 
-  actualizarPartida(id: string, data: { id_opcion_usuario: number; id_opcion_cpu: number; id_resultado: number }): Observable<any> {
+  actualizarPartida(
+    id: string,
+    data: {
+      id_opcion_usuario: number;
+      id_opcion_cpu: number;
+      id_resultado: number;
+    }
+  ): Observable<any> {
     return this.http.put(`${this.apiUrl}/partidas/up/${id}`, data);
   }
 
@@ -85,9 +100,15 @@ export class JuegoService {
     return this.http.delete(`${this.apiUrl}/partidas/del/${id}`);
   }
 
-  calcularResultado(idUsuario: number, idCpu: number): Observable<{ id: number }> {
+  calcularResultado(
+    idUsuario: number,
+    idCpu: number
+  ): Observable<{ id: number }> {
     const body = { idUsuario, idCpu };
-    return this.http.post<{ id: number }>(`${this.apiUrl}/partidas/calcular`, body);
+    return this.http.post<{ id: number }>(
+      `${this.apiUrl}/partidas/calcular`,
+      body
+    );
   }
 
   // Opciones disponibles del juego (con tipado fuerte)
@@ -121,7 +142,10 @@ export class JuegoService {
    * @param eleccionCPU - La elección de la CPU
    * @returns string - El ganador ('jugador', 'cpu' o 'empate')
    */
-  determinarGanador(eleccionJugador: OpcionJuego, eleccionCPU: OpcionJuego): 'jugador' | 'cpu' | 'empate' {
+  determinarGanador(
+    eleccionJugador: OpcionJuego,
+    eleccionCPU: OpcionJuego
+  ): 'jugador' | 'cpu' | 'empate' {
     // Si ambas elecciones son iguales, es empate
     if (eleccionJugador === eleccionCPU) {
       return 'empate';
@@ -129,9 +153,9 @@ export class JuegoService {
 
     // Condiciones de victoria para el jugador (tipado fuerte)
     const condicionesVictoria: Record<OpcionJuego, OpcionJuego> = {
-      'piedra': 'tijera',    // Piedra vence a tijera
-      'papel': 'piedra',     // Papel vence a piedra
-      'tijera': 'papel'      // Tijera vence a papel
+      piedra: 'tijera', // Piedra vence a tijera
+      papel: 'piedra', // Papel vence a piedra
+      tijera: 'papel', // Tijera vence a papel
     };
 
     // Verificar si el jugador gana (ahora TypeScript sabe que es seguro)
@@ -159,7 +183,7 @@ export class JuegoService {
     return {
       jugador: eleccionJugador,
       cpu: eleccionCPU,
-      ganador: ganador
+      ganador: ganador,
     };
   }
 
@@ -184,7 +208,12 @@ export class JuegoService {
    * @param puntuacionFinal - Resultado final (ej: "2-1")
    * @param rondasJugadas - Número total de rondas jugadas
    */
-  registrarResultadoPartida(modalidad: string, ganador: 'jugador' | 'cpu', puntuacionFinal: string, rondasJugadas: number): void {
+  registrarResultadoPartida(
+    modalidad: string,
+    ganador: 'jugador' | 'cpu',
+    puntuacionFinal: string,
+    rondasJugadas: number
+  ): void {
     // Calcular la duración de la partida
     const duracion = this.tiempoInicioPartida
       ? Math.floor((Date.now() - this.tiempoInicioPartida) / 1000)
@@ -201,7 +230,7 @@ export class JuegoService {
       puntuacionFinal,
       rondasJugadas,
       fecha: new Date(),
-      duracion
+      duracion,
     };
 
     // Guardar en el historial
@@ -218,7 +247,9 @@ export class JuegoService {
       this.historialPartidas.shift();
     }
 
-    console.log(`Partida registrada: ${ganador} ganó en modalidad ${modalidad} con resultado ${puntuacionFinal}`);
+    console.log(
+      `Partida registrada: ${ganador} ganó en modalidad ${modalidad} con resultado ${puntuacionFinal}`
+    );
   }
 
   /**
@@ -226,7 +257,10 @@ export class JuegoService {
    */
   private guardarHistorialEnLocalStorage(): void {
     try {
-      localStorage.setItem('nanodock_historial_partidas', JSON.stringify(this.historialPartidas));
+      localStorage.setItem(
+        'nanodock_historial_partidas',
+        JSON.stringify(this.historialPartidas)
+      );
     } catch (error) {
       console.error('Error al guardar historial en localStorage:', error);
     }
@@ -237,11 +271,13 @@ export class JuegoService {
    */
   private cargarHistorialDesdeLocalStorage(): void {
     try {
-      const historialGuardado = localStorage.getItem('nanodock_historial_partidas');
+      const historialGuardado = localStorage.getItem(
+        'nanodock_historial_partidas'
+      );
       if (historialGuardado) {
         // Convertir las fechas de string a Date
         const partidas = JSON.parse(historialGuardado) as DetallePartida[];
-        partidas.forEach(partida => {
+        partidas.forEach((partida) => {
           partida.fecha = new Date(partida.fecha);
           this.historialPartidas.push(partida);
         });
@@ -265,7 +301,7 @@ export class JuegoService {
    * @returns Array con las últimas partidas
    */
   obtenerUltimasPartidas(cantidad: number = 5): DetallePartida[] {
-    return this.historialPartidas
+    return [...this.historialPartidas]
       .sort((a, b) => b.fecha.getTime() - a.fecha.getTime())
       .slice(0, cantidad);
   }
@@ -281,7 +317,7 @@ export class JuegoService {
     const contadorModalidades: Record<string, number> = {};
 
     // Analizar historial
-    this.historialPartidas.forEach(partida => {
+    this.historialPartidas.forEach((partida) => {
       // Contar victorias
       if (partida.ganador === 'jugador') {
         victoriasJugador++;
@@ -290,7 +326,8 @@ export class JuegoService {
       }
 
       // Contar modalidades
-      contadorModalidades[partida.modalidad] = (contadorModalidades[partida.modalidad] || 0) + 1;
+      contadorModalidades[partida.modalidad] =
+        (contadorModalidades[partida.modalidad] || 0) + 1;
     });
 
     // Encontrar modalidad más jugada
@@ -305,9 +342,8 @@ export class JuegoService {
 
     // Calcular porcentaje de éxito
     const totalPartidas = this.historialPartidas.length;
-    const porcentajeExito = totalPartidas > 0
-      ? (victoriasJugador / totalPartidas) * 100
-      : 0;
+    const porcentajeExito =
+      totalPartidas > 0 ? (victoriasJugador / totalPartidas) * 100 : 0;
 
     // Devolver estadísticas
     return {
@@ -316,14 +352,14 @@ export class JuegoService {
       victoriasCPU,
       porcentajeExito,
       modalidadFavorita: modalidadFavorita || 'Ninguna',
-      ultimasPartidas: this.obtenerUltimasPartidas()
+      ultimasPartidas: this.obtenerUltimasPartidas(),
     };
   }
 
   /**
    * Constructor del servicio - cargar datos guardados al iniciar
    */
-  constructor(private http: HttpClient) {
+  constructor(private readonly http: HttpClient) {
     this.cargarHistorialDesdeLocalStorage();
   }
 }

@@ -17,7 +17,7 @@ export class Home implements OnInit {
   partidasFiltradas: Partida[] = [];
   filtro: string = 'Todos';
 
-  constructor(private partidaService: PartidaService) {}
+  constructor(private readonly partidaService: PartidaService) {}
 
   ngOnInit(): void {
     this.partidaService.getPartidas().subscribe(data => {

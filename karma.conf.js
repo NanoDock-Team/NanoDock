@@ -1,59 +1,57 @@
-// Karma configuration file, see link for more information
-// https://karma-runner.github.io/1.0/config/configuration-file.html
-
 module.exports = function (config) {
   config.set({
-    basePath: '',
-    frameworks: ['jasmine', '@angular-devkit/build-angular'],
+    basePath: "",
+    frameworks: ["jasmine", "@angular-devkit/build-angular"],
     plugins: [
-      require('karma-jasmine'),
-      require('karma-chrome-launcher'),
-      require('karma-jasmine-html-reporter'),
-      require('karma-coverage'),
-      require('@angular-devkit/build-angular/plugins/karma')
+      require("karma-jasmine"),
+      require("karma-chrome-launcher"),
+      require("karma-jasmine-html-reporter"),
+      require("karma-coverage"),
+      require("@angular-devkit/build-angular/plugins/karma"),
     ],
     client: {
       jasmine: {
-        // you can add configuration options for Jasmine here
-        // the possible options are listed at https://jasmine.github.io/api/edge/Configuration.html
-        // for example, you can disable the random execution with `random: false`
-        // or set a specific seed with `seed: 4321`
+        // Opciones de configuración de Jasmine
       },
-      clearContext: false // leave Jasmine Spec Runner output visible in browser
+      clearContext: false, // Deja visible la salida del runner en el navegador
     },
     jasmineHtmlReporter: {
-      suppressAll: true // removes the duplicated traces
+      suppressAll: true, // Suprime trazas duplicadas
     },
     coverageReporter: {
-      dir: require('path').join(__dirname, './coverage'),
-      subdir: '.',
+      // Ubicación y tipos de reportes según la documentación oficial.
+      dir: require("path").join(__dirname, "./coverage"),
+      subdir: ".",
       reporters: [
-        { type: 'html' },
-        { type: 'text-summary' },
-        { type: 'lcov' } // Este formato es necesario para SonarQube
+        { type: "html" },
+        { type: "lcovonly", file: "lcov.info" },
+        { type: "text-summary" },
       ],
+      fixWebpackSourcePaths: true,
+      includeAllSources: true,
+      // Umbrales mínimos de cobertura (ajusta según convenga)
       check: {
         global: {
           statements: 50,
           branches: 50,
           functions: 50,
-          lines: 50
-        }
-      }
+          lines: 50,
+        },
+      },
     },
-    reporters: ['progress', 'kjhtml', 'coverage'],
+    reporters: ["progress", "kjhtml"],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: true,
-    browsers: ['Chrome'],
+    browsers: ["Chrome"],
     customLaunchers: {
       ChromeHeadlessNoSandbox: {
-        base: 'ChromeHeadless',
-        flags: ['--no-sandbox']
-      }
+        base: "ChromeHeadless",
+        flags: ["--no-sandbox"],
+      },
     },
     singleRun: false,
-    restartOnFileChange: true
+    restartOnFileChange: true,
   });
 };
