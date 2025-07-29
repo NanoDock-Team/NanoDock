@@ -120,4 +120,91 @@ describe('JuegoService', () => {
     expect(httpClient).toBeTruthy();
     expect(httpClient instanceof HttpClient).toBe(true);
   });
+
+  it('debería obtener los resultados del juego', () => {
+    const mockResultados = [
+      { id: 1, nombre: 'jugador' },
+      { id: 2, nombre: 'cpu' },
+      { id: 3, nombre: 'empate' },
+    ];
+
+    service.obtenerResultados().subscribe((resultados) => {
+      expect(resultados).toEqual(mockResultados);
+    });
+
+    const req = httpMock.expectOne('http://localhost:3000/api/resultados/all');
+    expect(req.request.method).toBe('GET');
+    req.flush(mockResultados);
+  });
+
+  it('debería crear un resultado', () => {
+    const nombre = 'jugador';
+    service.crearResultado(nombre).subscribe((res) => {
+      expect(res).toEqual({ success: true });
+    });
+
+    const req = httpMock.expectOne('http://localhost:3000/api/resultados/');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ nombre });
+    req.flush({ success: true });
+  });
+
+  it('debería crear una partida', () => {
+    const data = { id_opcion_usuario: 1, id_opcion_cpu: 2, id_resultado: 3 };
+    service.crearPartida(data).subscribe((res) => {
+      expect(res).toEqual({ success: true });
+    });
+
+    const req = httpMock.expectOne('http://localhost:3000/api/partidas/');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(data);
+    req.flush({ success: true });
+  });
+
+  it('debería actualizar una partida', () => {
+    const id = '456';
+    const data = { id_opcion_usuario: 1, id_opcion_cpu: 2, id_resultado: 3 };
+
+    service.actualizarPartida(id, data).subscribe((res) => {
+      expect(res).toEqual({ success: true });
+    });
+
+    const req = httpMock.expectOne(
+      `http://localhost:3000/api/partidas/up/${id}`
+    );
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual(data);
+    req.flush({ success: true });
+  });
+
+  it('debería eliminar una partida', () => {
+    const id = '789';
+
+    service.eliminarPartida(id).subscribe((res) => {
+      expect(res).toEqual({ success: true });
+    });
+
+    const req = httpMock.expectOne(
+      `http://localhost:3000/api/partidas/del/${id}`
+    );
+    expect(req.request.method).toBe('DELETE');
+    req.flush({ success: true });
+  });
+
+  it('debería calcular el resultado de una partida', () => {
+    const idUsuario = 1;
+    const idCpu = 2;
+    const mockResponse = { id: 42 };
+
+    service.calcularResultado(idUsuario, idCpu).subscribe((res) => {
+      expect(res.id).toBe(42);
+    });
+
+    const req = httpMock.expectOne(
+      'http://localhost:3000/api/partidas/calcular'
+    );
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ idUsuario, idCpu });
+    req.flush(mockResponse);
+  });
 });
