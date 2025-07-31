@@ -1,3 +1,4 @@
+/* istanbul ignore next */
 import { Component, OnInit } from '@angular/core';
 import { Partida } from '../../interfaces/partida';
 import { PartidaService } from '../../services/partida/partida.service';

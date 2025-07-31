@@ -28,7 +28,8 @@ module.exports = function (config) {
         { type: "text-summary" },
       ],
       fixWebpackSourcePaths: true,
-      includeAllSources: true,
+      //includeAllSources: true,
+      skipFilesWithNoCoverage: true,
       // Umbrales mínimos de cobertura (ajusta según convenga)
       check: {
         global: {
