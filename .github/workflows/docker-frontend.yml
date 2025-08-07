@@ -8,7 +8,6 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -20,7 +19,10 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker image
-        run: docker build -t elizabethgtz/nanodock-frontend:latest .
+        run: docker build -t nanodock-frontend .
+
+      - name: Tag Docker image
+        run: docker tag nanodock-frontend elizabethgtz/nanodock-frontend:latest
 
       - name: Push Docker image
         run: docker push elizabethgtz/nanodock-frontend:latest
