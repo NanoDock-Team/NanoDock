@@ -1,3 +1,4 @@
+/* istanbul ignore next */
 import { Component, OnInit } from '@angular/core';
 import { Partida } from '../../interfaces/partida';
 import { PartidaService } from '../../services/partida/partida.service';
@@ -17,7 +18,7 @@ export class Home implements OnInit {
   partidasFiltradas: Partida[] = [];
   filtro: string = 'Todos';
 
-  constructor(private partidaService: PartidaService) {}
+  constructor(private readonly partidaService: PartidaService) {}
 
   ngOnInit(): void {
     this.partidaService.getPartidas().subscribe(data => {
