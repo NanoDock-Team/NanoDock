@@ -91,63 +91,17 @@ export class Juego implements OnInit {
     this.actualizarEstadisticas();
   }
   actualizarEstadisticas(): void {
-    // Obtener todas las partidas desde backend
-    this.juegoService.obtenerPartidas().subscribe({
-      next: (partidasBackend) => {
-        // Crear una copia ordenada del array
-        const partidasOrdenadas = [...partidasBackend].sort(
-          (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
-        );
+    // Usar el historial local almacenado en el servicio en lugar del backend
+    const historialLocal = this.juegoService.obtenerHistorialPartidas();
 
-        // Asignar las primeras 3 partidas
-        this.historialReciente = partidasOrdenadas.slice(0, 3);
+    // Ordenar por fecha descendente y tomar las 3 más recientes
+    this.historialReciente = [...historialLocal]
+      .sort((a, b) => b.fecha.getTime() - a.fecha.getTime())
+      .slice(0, 3);
 
-        // Aquí puedes calcular estadísticas generales desde backend o localmente
-        this.estadisticasGenerales = this.calcularEstadisticasDesdeHistorial(
-          this.historialReciente
-        );
-      },
-      error: (err) => console.error('Error al obtener partidas:', err),
-    });
-  }
-
-  private calcularEstadisticasDesdeHistorial(
-    partidas: DetallePartida[]
-  ): EstadisticasGenerales {
-    let victoriasJugador = 0;
-    let victoriasCPU = 0;
-    const contadorModalidades: Record<string, number> = {};
-
-    partidas.forEach((p) => {
-      if (p.ganador === 'jugador') victoriasJugador++;
-      else if (p.ganador === 'cpu') victoriasCPU++;
-
-      contadorModalidades[p.modalidad] =
-        (contadorModalidades[p.modalidad] || 0) + 1;
-    });
-
-    let modalidadFavorita = '';
-    let maxPartidas = 0;
-    Object.entries(contadorModalidades).forEach(([mod, count]) => {
-      if (count > maxPartidas) {
-        maxPartidas = count;
-        modalidadFavorita = mod;
-      }
-    });
-
-    const totalPartidas = partidas.length;
-    const porcentajeExito = totalPartidas
-      ? (victoriasJugador / totalPartidas) * 100
-      : 0;
-
-    return {
-      totalPartidas,
-      victoriasJugador,
-      victoriasCPU,
-      porcentajeExito,
-      modalidadFavorita: modalidadFavorita || 'Ninguna',
-      ultimasPartidas: partidas,
-    };
+    // Calcular estadísticas desde el historial local
+    this.estadisticasGenerales =
+      this.juegoService.obtenerEstadisticasGenerales();
   }
 
   cambiarModalidad(modalidadId: string): void {
@@ -271,7 +225,7 @@ export class Juego implements OnInit {
       this.rondasJugadas
     );
 
-    setTimeout(() => this.actualizarEstadisticas(), 500);
+    setTimeout(() => this.actualizarEstadisticas(), 100);
   }
 
   reiniciarJuego(): void {
