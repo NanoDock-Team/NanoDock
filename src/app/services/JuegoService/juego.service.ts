@@ -45,7 +45,7 @@ export interface EstadisticasGenerales {
 })
 export class JuegoService {
 
-  private apiUrl = 'http://localhost:3000/api'; // Cambia esta URL si usas otro host/puerto
+  private apiUrl = 'https://nanodockbackend-abc5ctb4hsepb7ff.canadacentral-01.azurewebsites.net/api'; // Cambia esta URL si usas otro host/puerto
 
   // Inyectar HttpClient para hacer peticiones HTTP
 
