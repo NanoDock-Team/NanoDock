@@ -6,7 +6,7 @@ import { HttpClient } from '@angular/common/http';
   providedIn: 'root'
 })
 export class PartidaService {
-  private readonly apiUrl = 'http://localhost:3000/api/partidas/all';
+  private readonly apiUrl = 'https://nanodockbackend-abc5ctb4hsepb7ff.canadacentral-01.azurewebsites.net/api/partidas/all';
 
   constructor(private readonly http: HttpClient) {}
 

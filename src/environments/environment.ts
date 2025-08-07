@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3000/api',
+  apiUrl: 'https://nanodockbackend-abc5ctb4hsepb7ff.canadacentral-01.azurewebsites.net/api',
 };
