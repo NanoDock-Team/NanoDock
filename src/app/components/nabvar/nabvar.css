@@ -6,13 +6,18 @@
 }
 
 .nav-button::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
   transition: left 0.5s;
 }
 
@@ -29,7 +34,7 @@
 }
 
 .active-link::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   border-radius: 0.5rem;
@@ -41,7 +46,8 @@
 }
 
 @keyframes borderGlow {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -51,28 +57,24 @@
 
 /* Efecto de scanlines retro */
 .navbar-scanlines {
-  background-image: 
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0, 255, 255, 0.03) 2px,
-      rgba(0, 255, 255, 0.03) 4px
-    );
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 255, 255, 0.03) 2px,
+    rgba(0, 255, 255, 0.03) 4px
+  );
 }
 
 /* Animación de texto retro */
 @keyframes textGlow {
-  0%, 100% {
-    text-shadow: 
-      0 0 5px currentColor,
-      0 0 10px currentColor,
+  0%,
+  100% {
+    text-shadow: 0 0 5px currentColor, 0 0 10px currentColor,
       0 0 15px currentColor;
   }
   50% {
-    text-shadow: 
-      0 0 2px currentColor,
-      0 0 5px currentColor,
+    text-shadow: 0 0 2px currentColor, 0 0 5px currentColor,
       0 0 8px currentColor;
   }
 }
@@ -86,14 +88,26 @@
   filter: brightness(1.1);
 }
 
-/* Responsive adjustments */
+/* Estilos para el botón de menú en móviles */
+.mobile-menu-toggle {
+  background: transparent;
+  border: none;
+}
+
+/* Estilos para el menú en móviles */
+.mobile-menu a {
+  /* Se puede ajustar el padding, fuente y márgenes para mejorar el toque */
+  display: block;
+  text-align: center;
+}
+
+/* Opcional: animación o transición para el menú móvil */
+.mobile-menu {
+  transition: max-height 0.3s ease-in-out;
+}
+
 @media (max-width: 768px) {
-  .nav-button {
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-  }
-  
-  .nav-button span:first-child {
+  .nav-button .icon {
     display: none;
   }
 }

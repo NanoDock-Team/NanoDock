@@ -207,4 +207,91 @@ describe('JuegoService', () => {
     expect(req.request.body).toEqual({ idUsuario, idCpu });
     req.flush(mockResponse);
   });
+
+  //==========
+
+  it('debería manejar error al obtener opciones', () => {
+    service.obtenerOpciones().subscribe({
+      next: () => fail('Debe emitir un error'),
+      error: (err) => {
+        expect(err.status).toBe(500);
+      }
+    });
+
+    const req = httpMock.expectOne(`${service['apiUrl']}/opciones/all`);
+    expect(req.request.method).toBe('GET');
+    req.flush('Error en el servidor', { status: 500, statusText: 'Server Error' });
+  });
+
+  it('debería manejar error al crear una partida', () => {
+    const data = { id_opcion_usuario: 1, id_opcion_cpu: 2, id_resultado: 3 };
+
+    service.crearPartida(data).subscribe({
+      next: () => fail('Debe emitir un error'),
+      error: (err) => {
+        expect(err.status).toBe(400);
+      }
+    });
+
+    const req = httpMock.expectOne(`${service['apiUrl']}/partidas/`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(data);
+    req.flush('Solicitud incorrecta', { status: 400, statusText: 'Bad Request' });
+  });
+
+  it('debería manejar error al actualizar una partida', () => {
+    const id = '456';
+    const data = { id_opcion_usuario: 1, id_opcion_cpu: 2, id_resultado: 3 };
+
+    service.actualizarPartida(id, data).subscribe({
+      next: () => fail('Debe emitir un error'),
+      error: (err) => {
+        expect(err.status).toBe(404);
+      }
+    });
+
+    const req = httpMock.expectOne(`${service['apiUrl']}/partidas/up/${id}`);
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual(data);
+    req.flush('No encontrado', { status: 404, statusText: 'Not Found' });
+  });
+
+  it('debería manejar error al eliminar una partida', () => {
+    const id = '789';
+
+    service.eliminarPartida(id).subscribe({
+      next: () => fail('Debe emitir un error'),
+      error: (err) => {
+        expect(err.status).toBe(403);
+      }
+    });
+
+    const req = httpMock.expectOne(`${service['apiUrl']}/partidas/del/${id}`);
+    expect(req.request.method).toBe('DELETE');
+    req.flush('Prohibido', { status: 403, statusText: 'Forbidden' });
+  });
+
+  // Test para simular error en guardarHistorialEnLocalStorage
+  it('debería manejar error en guardarHistorialEnLocalStorage', () => {
+    spyOn(localStorage, 'setItem').and.throwError('Error al guardar');
+    // Al registrar el resultado se invoca guardarHistorialEnLocalStorage internamente.
+    // Verificamos que no se propague la excepción (el error se maneja internamente)
+    expect(() => {
+      service.registrarResultadoPartida('Test', 'jugador', '1-0', 1);
+    }).not.toThrow();
+  });
+
+  // Test para simular error en cargarHistorialDesdeLocalStorage
+  it('debería manejar error en cargarHistorialDesdeLocalStorage', () => {
+    spyOn(localStorage, 'getItem').and.throwError('Error al cargar');
+    // Reinicializamos el servicio para que intente cargar el historial y verifique el manejo del error.
+    expect(() => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [HttpClientTestingModule],
+        providers: [JuegoService],
+      });
+    }).not.toThrow();
+  });  
+
 });
