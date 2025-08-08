@@ -242,34 +242,36 @@ export class Juego implements OnInit {
     return this.opcionesJuego.find((opcion) => opcion.nombre === nombreOpcion);
   }
 
+  private getRandomInt(max: number): number {
+    const array = new Uint32Array(1);
+    window.crypto.getRandomValues(array);
+    return array[0] % max;
+}
+
   obtenerMensajeResultado(): string {
-    if (!this.resultadoActual) return '';
-    if (this.partidaTerminada) {
-      return this.ganadorPartida === 'jugador'
-        ? '¡VICTORIA! Has ganado la partida 🏆'
-        : '¡DERROTA! La CPU ha ganado la partida 🤖';
-    }
-    const mensajes = {
-      jugador: [
+    if (!this.partidaTerminada) {
+      // Si la partida no está terminada, devolver uno de los mensajes aleatorios
+      const mensajes = [
         '¡Felicidades! ¡Ganaste esta ronda!',
         '¡Excelente jugada!',
         '¡Bien hecho!',
-      ],
-      cpu: [
-        'La CPU gana esta ronda',
-        'Mejor suerte la próxima vez',
-        '¡Inténtalo de nuevo!',
-      ],
-      empate: ['¡Es un empate!', '¡Misma elección!', '¡Empate técnico!'],
-    };
-    const arrayMensajes = mensajes[this.resultadoActual.ganador];
-    const indiceAleatorio = Math.floor(Math.random() * arrayMensajes.length);
-    return arrayMensajes[indiceAleatorio];
+      ];
+      return mensajes[this.getRandomInt(mensajes.length)];
+    }
+    if (this.ganadorPartida === 'jugador') {
+      return '¡VICTORIA! Has ganado la partida 🏆';
+    }
+    if (this.ganadorPartida === 'cpu') {
+      return 'Has perdido la partida 😞';
+    }
+    return '';
   }
 
   calcularPorcentajeVictorias(): string {
-    if (this.rondasJugadas === 0) return '0';
-    return ((this.puntuacionJugador / this.rondasJugadas) * 100).toFixed(1);
+    if (this.rondasJugadas === 0) return '0%';
+    return (
+      ((this.puntuacionJugador / this.rondasJugadas) * 100).toFixed(1) + '%'
+    );
   }
 
   obtenerProgresoPartida(): string {
